@@ -73,6 +73,9 @@ public class ImportExcel {
         List<CloudServer> cloudServerListB = new ArrayList<CloudServer>();
         List<CloudServer> cloudServerListC = new ArrayList<CloudServer>();
 
+        List<CloudServer> resultCloudServerList = new ArrayList<CloudServer>();
+
+
         CloudServer cloudServerA;
         CloudServer cloudServerB;
         CloudServer cloudServerC;
@@ -132,9 +135,9 @@ public class ImportExcel {
             employeeNameC = cloudServerC.getEmployeeName();
             departmentC = cloudServerC.getDepartment();
 
-            String result = "第1个人员：[" + employeeNameA + "]对应的部门[" + departmentA
-                    + "]；第2个人员：["+ employeeNameB + "]对应的部门[" + departmentB
-                    + "]；第3个人员：["+ employeeNameC + "]对应的部门[" + departmentC + "]";
+            String result = "第1个人员：[" + employeeNameA + "]部门[" + departmentA
+                    + "]；第2个人员：["+ employeeNameB + "]部门[" + departmentB
+                    + "]；第3个人员：["+ employeeNameC + "]部门[" + departmentC + "]";
 
 
             if(departmentA.equals(departmentB) || departmentB.equals(departmentC) || departmentC.equals(departmentA)){
@@ -144,7 +147,11 @@ public class ImportExcel {
             }else{
                 /*找到后退出循环*/
                 System.out.println("第"+ (j + 1) +"次选择，" + result + "满足条件！");
-                map.put("Result", result);
+//                map.put("Result", result);
+                resultCloudServerList.add(cloudServerA);
+                resultCloudServerList.add(cloudServerB);
+                resultCloudServerList.add(cloudServerC);
+                map.put("resultCloudServerList", resultCloudServerList );
                 break;
             }
 
@@ -199,8 +206,12 @@ public class ImportExcel {
                         for (Field f : declaredFields) {
                             f.setAccessible(true);
                             if (f.getName().equals(String.valueOf(ExcelUtils.getCellValue(cellHeader)))) {
+/*
                                 if ("ip".equals(f.getName()) && !(StringUtils.isboolIp(cellValue.toString()))) {
                                     rowMessage += "第" + (c + 1) + "列数据不是有效的IP，请仔细检查；";
+*/
+                                if ("groupId".equals(f.getName()) && !(StringUtils.isABC(cellValue.toString()))) {
+                                    rowMessage += "第" + (c + 1) + "列数据不是有效的组别，请仔细检查；";
                                     break;
                                 }
                                 try {
@@ -254,17 +265,18 @@ public class ImportExcel {
             tempFile.delete();
         }
 
-        //全部验证通过才导入到数据库
+        //全部验证通过才导入到数据库,同时进行数据筛选
         if (StringUtils.isEmpty(errorMsg)) {
             for (CloudServer server : cloudServerList) {
                 //TODO 插入到数据库
                 System.out.println(server);
             }
             errorMsg = "导入成功，共" + cloudServerList.size() + "条数据！";
+
+            /*找到对应条件的人员*/
+            getRandomNameList(cloudServerList, map);
         }
 
-        /*找到对应条件的人员*/
-        getRandomNameList(cloudServerList, map);
 
         map.put("cloudServerList", cloudServerList);
         map.put("errorMsg", errorMsg);

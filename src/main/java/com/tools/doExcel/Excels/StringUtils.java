@@ -36,6 +36,20 @@ public class StringUtils {
         return matcher.matches();
     }
 
+    /**
+     * 判断字符串是否为A或B或C * @return
+     */
+    public static boolean isABC(String str) {
+        switch(str){
+            case "A":
+            case "B":
+            case "C":
+                return true;
+            default:
+                return false;
+        }
+    }
+
 //    public static void main(String[] args) {
 //        System.out.println(isboolIp("192.168.12.132"));
 //    }
